@@ -20,4 +20,7 @@ response = model.generate_content("Give me a sample resume in markdown format th
                                   "for my skills and the job description I provided. Here is a discription of myself:" + Description
                                   + "here is a job description: " + JobDescription )
 #prints response
-print(response.text)
+print("Resume has been generated successfully. See the file resume.md for the generated resume.")
+
+with (open ("resume.md", "w")) as file:
+    file.write(response.text)
