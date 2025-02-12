@@ -5,6 +5,7 @@ import sqlite3
 # define job db file
 DB_FILE = "jobs.db"
 
+
 # define the table creation SQL statement
 CREATE_TABLE_QUERY = """
 CREATE TABLE IF NOT EXISTS jobs (
