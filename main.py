@@ -5,8 +5,6 @@ import sqlite3
 # define job db file
 DB_FILE = "jobs.db"
 
-
-
 # define the table creation SQL statement
 CREATE_TABLE_QUERY = """
 CREATE TABLE IF NOT EXISTS jobs (
@@ -56,25 +54,25 @@ def main():
     model = genai.GenerativeModel("gemini-1.5-flash")
 
     # Gets user description and Job description
-    #myPerson = getUserInfo()
+    myPerson = getUserInfo()
     jobData = parseJSON()
-    #jobData2 = parse_alternate_json()
+    jobData2 = parse_alternate_json()
     if not jobData:  # If jobData is empty, stop execution
         print("Error: No job data found.")
         return
-   # if not jobData2:
-    #    print("Error: No job data found. in JobData2")
-     #   return
+    if not jobData2:
+        print("Error: No job data found. in JobData2")
+        return
 
 
     # dummy info:
-    myPerson = person("John Doe", 21, "Bridgewater State University", 3.7,
-                      "Assistant Manager at Market Basket since 2019", "Java, Python, Communication", "MA Payroll Database Sorter",
-                      "JohnDoe@gmail.com", "123-456-7891", "www.linkedin.com/JohnDoe", "123 Unemployed Ave, Bridgewater MA, 12345")
+    #myPerson = person("John Doe", 21, "Bridgewater State University", 3.7,
+    #                 "Assistant Manager at Market Basket since 2019", "Java, Python, Communication", "MA Payroll Database Sorter",
+    #                 "JohnDoe@gmail.com", "123-456-7891", "www.linkedin.com/JohnDoe", "123 Unemployed Ave, Bridgewater MA, 12345")
 
     create_database()
     insert_jobs(jobData,sqlite3.connect(DB_FILE) )
-    #insert_jobs(jobData2)
+    insert_jobs(jobData2, sqlite3.connect(DB_FILE) )
 
     firstjob = jobData[0]  # Ensure there's at least one job
     response = model.generate_content(
@@ -142,10 +140,16 @@ def parse_alternate_json(file_path="rapid_jobs2.json"):
             data = []
             for line in file:
                 try:
-                    # Parse each line and append to the data list
-                    data.append(json.loads(line))
+                    parsed_line = json.loads(line)  # Expecting an array
+                    if isinstance(parsed_line, list):  # Ensure it's a list
+                        data.extend(parsed_line)  # Add all elements from the array
+                    else:
+                        print(f"Unexpected format (not a list): {parsed_line}")
                 except json.JSONDecodeError as e:
                     print(f"Error parsing line: {e}")
+
+            if not data:
+                print("No valid JSON data found.")
 
             transformed_data = []
             for job in data:
