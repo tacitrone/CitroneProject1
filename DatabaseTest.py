@@ -1,6 +1,6 @@
 import sqlite3
 import pytest
-from main import CREATE_TABLE_QUERY, insert_jobs
+from main import insert_jobs
 
 # Sample test job entry
 TEST_JOB = [

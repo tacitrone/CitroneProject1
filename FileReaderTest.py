@@ -1,7 +1,7 @@
-import json
 import pytest
 import os
 from main import parseJSON
+
 
 @pytest.fixture
 def setup_test_file():
@@ -11,12 +11,12 @@ def setup_test_file():
         '{"name": "item1", "value": 10}',
         '{"name": "item2", "value": 20}',
         '{"name": "item3", "value": 30}',
-        '{"name": "item4", "value": 40}'
+        '{"name": "item4", "value": 40}',
     ]
 
     with open(test_filename, "w", encoding="utf-8") as file:
         for line in test_data:
-            file.write(line + '\n')
+            file.write(line + "\n")
 
     # Return the test filename for use in the tests
     yield test_filename
@@ -36,13 +36,13 @@ def test_parseJSON_valid_data(setup_test_file):
     assert len(result) == 4, "Number of items should be 4"
 
     # Assert the first item matches expected data
-    assert result[0]['name'] == "item1", "First item should be 'item1'"
+    assert result[0]["name"] == "item1", "First item should be 'item1'"
 
     # Assert the last item matches expected data
-    assert result[-1]['name'] == "item4", "Last item should be 'item4'"
+    assert result[-1]["name"] == "item4", "Last item should be 'item4'"
 
     # Assert the second item has the correct value
-    assert result[1]['value'] == 20, "Second item should have value 20"
+    assert result[1]["value"] == 20, "Second item should have value 20"
 
     # Check if there's a middle item with expected value
-    assert result[2]['value'] == 30, "Middle item should have value 30"
+    assert result[2]["value"] == 30, "Middle item should have value 30"

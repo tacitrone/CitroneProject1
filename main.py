@@ -41,9 +41,11 @@ CREATE TABLE IF NOT EXISTS jobs (
     ceo_photo_url TEXT
 );
 """
+
+
 # gets API key
 def get_api_key(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         data = json.load(file)
         return data.get("api_key")
 
@@ -64,31 +66,46 @@ def main():
         print("Error: No job data found. in JobData2")
         return
 
-
     # dummy info:
-    #myPerson = person("John Doe", 21, "Bridgewater State University", 3.7,
+    # myPerson = person("John Doe", 21, "Bridgewater State University", 3.7,
     #                 "Assistant Manager at Market Basket since 2019", "Java, Python, Communication", "MA Payroll Database Sorter",
     #                 "JohnDoe@gmail.com", "123-456-7891", "www.linkedin.com/JohnDoe", "123 Unemployed Ave, Bridgewater MA, 12345")
 
     create_database()
-    insert_jobs(jobData,sqlite3.connect(DB_FILE) )
-    insert_jobs(jobData2, sqlite3.connect(DB_FILE) )
+    insert_jobs(jobData, sqlite3.connect(DB_FILE))
+    insert_jobs(jobData2, sqlite3.connect(DB_FILE))
 
     firstjob = jobData[0]  # Ensure there's at least one job
     response = model.generate_content(
-       "Give me a sample resume in markdown format designed for my skills "
-       "and the job description I provided.\n"
+        "Give me a sample resume in markdown format designed for my skills "
+        "and the job description I provided.\n"
         f"Here is a description of myself:\n{printPerson(myPerson)}"
         f"\nHere is a job description:\n{firstjob['description']}"
     )
     # prints response
-    print("Resume has been generated successfully. See the file resume.md for the generated resume.")
+    print(
+        "Resume has been generated successfully. See the file resume.md for the generated resume."
+    )
 
-    with (open("resume.md", "w")) as file:
+    with open("resume.md", "w") as file:
         file.write(response.text)
 
+
 class person:
-    def __init__(self, name, age, school, gpa, experience, skills, projects, email, phone, linkedIn, address):
+    def __init__(
+        self,
+        name,
+        age,
+        school,
+        gpa,
+        experience,
+        skills,
+        projects,
+        email,
+        phone,
+        linkedIn,
+        address,
+    ):
         self.name = name
         self.age = age
         self.school = school
@@ -102,8 +119,7 @@ class person:
         self.address = address
 
 
-
-def getUserInfo(): # guides the user to give necessary information
+def getUserInfo():  # guides the user to give necessary information
     name = input("Enter your name: ")
     age = int(input("Enter your age: "))
     school = input("Enter your school: ")
@@ -115,7 +131,19 @@ def getUserInfo(): # guides the user to give necessary information
     phone = input("Enter your phone number: ")
     linkedIn = input("Enter your linkedIn link: ")
     address = input("Enter your address: ")
-    return person(name, age,school, gpa, experience, skills, project, email, phone, linkedIn, address)
+    return person(
+        name,
+        age,
+        school,
+        gpa,
+        experience,
+        skills,
+        project,
+        email,
+        phone,
+        linkedIn,
+        address,
+    )
 
 
 def parseJSON(filename="fixed_rapidResults.json"):
@@ -158,11 +186,18 @@ def parse_alternate_json(file_path="rapid_jobs2.json"):
                     transformed_job = {
                         "id": job.get("id", ""),
                         "site": "Unknown",
-                        "job_url": job["jobProviders"][0]["url"] if isinstance(job.get("jobProviders"), list) and len(
-                            job["jobProviders"]) > 0 else "",
-                        "job_url_direct": job["jobProviders"][0]["url"] if isinstance(job.get("jobProviders"),
-                                                                                      list) and len(
-                            job["jobProviders"]) > 0 else "",
+                        "job_url": (
+                            job["jobProviders"][0]["url"]
+                            if isinstance(job.get("jobProviders"), list)
+                            and len(job["jobProviders"]) > 0
+                            else ""
+                        ),
+                        "job_url_direct": (
+                            job["jobProviders"][0]["url"]
+                            if isinstance(job.get("jobProviders"), list)
+                            and len(job["jobProviders"]) > 0
+                            else ""
+                        ),
                         "title": job.get("title", ""),
                         "company": job.get("company", ""),
                         "location": job.get("location", ""),
@@ -189,7 +224,7 @@ def parse_alternate_json(file_path="rapid_jobs2.json"):
                         "logo_photo_url": job.get("image", ""),
                         "banner_photo_url": "",
                         "ceo_name": "",
-                        "ceo_photo_url": ""
+                        "ceo_photo_url": "",
                     }
                     transformed_data.append(transformed_job)
 
@@ -198,20 +233,24 @@ def parse_alternate_json(file_path="rapid_jobs2.json"):
             print(f"Error reading the file: {e}")
             return []
 
-def printPerson(person):
-    return (f"Name: {person.name}\n"
-            f"Age: {person.age}\n"
-            f"School: {person.school}\n"
-            f"GPA: {person.gpa}\n"
-            f"Experience: {person.experience}\n"
-            f"Skills: {person.skills}\n"
-            f"Projects: {person.projects}\n"
-            f"Email: {person.email}\n"
-            f"Phone: {person.phone}\n"
-            f"LinkedIn: {person.linkedIn}\n"
-            f"Address: {person.address}\n")
 
-#CREATE DATABASE
+def printPerson(person):
+    return (
+        f"Name: {person.name}\n"
+        f"Age: {person.age}\n"
+        f"School: {person.school}\n"
+        f"GPA: {person.gpa}\n"
+        f"Experience: {person.experience}\n"
+        f"Skills: {person.skills}\n"
+        f"Projects: {person.projects}\n"
+        f"Email: {person.email}\n"
+        f"Phone: {person.phone}\n"
+        f"LinkedIn: {person.linkedIn}\n"
+        f"Address: {person.address}\n"
+    )
+
+
+# CREATE DATABASE
 def create_database():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -223,10 +262,11 @@ def create_database():
 def safe_float(value):
     try:
         # Try to convert the value to a float
-        return float(value) if value not in [None, ''] else 0.0
+        return float(value) if value not in [None, ""] else 0.0
     except ValueError:
         # If conversion fails, return 0.0
         return 0.0
+
 
 def insert_jobs(data, conn):
     cursor = conn.cursor()
@@ -245,21 +285,44 @@ def insert_jobs(data, conn):
         min_amount = safe_float(job.get("min_amount"))
         max_amount = safe_float(job.get("max_amount"))
 
-        cursor.execute(INSERT_QUERY, (
-            job.get("id"), job.get("site"), job.get("job_url"), job.get("job_url_direct"),
-            job.get("title"), job.get("company"), job.get("location"), job.get("job_type"),
-            job.get("date_posted"), job.get("salary_source"), job.get("interval"),
-            min_amount, max_amount, job.get("currency"),
-            job.get("is_remote"), job.get("job_level"), job.get("job_function"),
-            job.get("company_industry"), job.get("listing_type"), job.get("emails"),
-            job.get("description"), job.get("company_url"), job.get("company_url_direct"),
-            job.get("company_addresses"), job.get("company_num_employees"),
-            job.get("company_revenue"), job.get("company_description"), job.get("logo_photo_url"),
-            job.get("banner_photo_url"), job.get("ceo_name"), job.get("ceo_photo_url")
-        ))
+        cursor.execute(
+            INSERT_QUERY,
+            (
+                job.get("id"),
+                job.get("site"),
+                job.get("job_url"),
+                job.get("job_url_direct"),
+                job.get("title"),
+                job.get("company"),
+                job.get("location"),
+                job.get("job_type"),
+                job.get("date_posted"),
+                job.get("salary_source"),
+                job.get("interval"),
+                min_amount,
+                max_amount,
+                job.get("currency"),
+                job.get("is_remote"),
+                job.get("job_level"),
+                job.get("job_function"),
+                job.get("company_industry"),
+                job.get("listing_type"),
+                job.get("emails"),
+                job.get("description"),
+                job.get("company_url"),
+                job.get("company_url_direct"),
+                job.get("company_addresses"),
+                job.get("company_num_employees"),
+                job.get("company_revenue"),
+                job.get("company_description"),
+                job.get("logo_photo_url"),
+                job.get("banner_photo_url"),
+                job.get("ceo_name"),
+                job.get("ceo_photo_url"),
+            ),
+        )
 
     conn.commit()  # Ensure changes are saved
-
 
 
 if __name__ == "__main__":
