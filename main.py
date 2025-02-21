@@ -5,8 +5,6 @@ import sqlite3
 # Define the database file
 DB_FILE = "jobs.db"
 
-
-
 # SQL statement to create the jobs table if it does not exist
 CREATE_TABLE_QUERY = """
 CREATE TABLE IF NOT EXISTS jobs (
@@ -59,6 +57,7 @@ def main():
     model = genai.GenerativeModel("gemini-1.5-flash")
 
     # Gather user information and parse job data
+    create_person_table()
     myPerson = getUserInfo()
     jobData = parseJSON()
     jobData2 = parse_alternate_json()
@@ -92,7 +91,7 @@ def main():
 
 # Class to store user information
 class Person:
-    def __init__(self, name, age, school, gpa, experience, skills, projects, email, phone, linkedIn, address):
+    def __init__(self, name, age, school, gpa, experience, skills, projects,  email, phone, linkedIn, address, classes):
         self.name = name
         self.age = age
         self.school = school
@@ -104,6 +103,7 @@ class Person:
         self.phone = phone
         self.linkedIn = linkedIn
         self.address = address
+        self.classes = classes
 
 
 # Function to guide the user to input necessary information
@@ -119,7 +119,51 @@ def getUserInfo():
     phone = input("Enter your phone number: ")
     linkedIn = input("Enter your LinkedIn profile link: ")
     address = input("Enter your address: ")
-    return Person(name, age, school, gpa, experience, skills, project, email, phone, linkedIn, address)
+    classes = input("Enter your classes: ")
+
+    # Create a Person object
+    person = Person(name, age, school, gpa, experience, skills, project, email, phone, linkedIn, address, classes)
+
+    # Store the person data in the database
+    insert_person_into_db(person)
+
+    return person
+
+# Function to create the Person table if it doesn't exist
+def create_person_table():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS person (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        age INTEGER,
+        school TEXT,
+        gpa REAL,
+        experience TEXT,
+        skills TEXT,
+        projects TEXT,
+        email TEXT,
+        phone TEXT,
+        linked_in TEXT,
+        address TEXT,
+        classes TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+# Function to insert a Person into the database
+def insert_person_into_db(person):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO person (name, age, school, gpa, experience, skills, projects, email, phone, linked_in, address, classes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (person.name, person.age, person.school, person.gpa, person.experience, person.skills, person.projects, person.email,
+          person.phone, person.linkedIn, person.address, person.classes))
+    conn.commit()
+    conn.close()
 
 
 # Function to parse job data from a JSON file
