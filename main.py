@@ -250,5 +250,29 @@ def insert_jobs(data, conn):
     conn.commit()
 
 
+# Function to fetch jobs data from the database
+def fetch_jobs_data():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM jobs")
+    jobs = cursor.fetchall()
+    conn.close()
+
+    # Map the job data to a dictionary for easy access
+    job_data = []
+    for job in jobs:
+        job_data.append({
+            'id': job[0],
+            'title': job[4],
+            'company': job[5],
+            'location': job[6],
+            'job_type': job[7],
+            'date_posted': job[8],
+            'salary_source': job[9],
+            'description': job[20]  # Assuming description is in the 21st column
+        })
+
+    return job_data
+
 if __name__ == "__main__":
     main()
