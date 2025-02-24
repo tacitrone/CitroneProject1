@@ -2,7 +2,7 @@ import sys
 import sqlite3
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QTextEdit, QVBoxLayout, QWidget, QLabel, \
     QPushButton, QHBoxLayout, QLineEdit
-from main import *
+from Functions import *
 
 # Define the database file
 DB_FILE = "jobs.db"
@@ -208,12 +208,3 @@ class JobInfoApp(QMainWindow):
         self.job_list_widget.addItems([job['title'] for job in self.jobs_data])
 
 
-# Run the PyQt application
-def run_app():
-    app = QApplication(sys.argv)
-    window = JobInfoApp()
-    window.show()
-    sys.exit(app.exec_())
-
-if __name__ == "__main__":
-    run_app()

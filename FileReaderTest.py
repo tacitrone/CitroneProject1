@@ -1,6 +1,6 @@
 import pytest
 import os
-from main import parseJSON
+from Functions import parseJSON
 
 
 @pytest.fixture

@@ -27,7 +27,7 @@ Before running the program, you must complete the following setup steps.
 ### 1. Run the Program
 Run the script using Python:
 ```bash
-python main.py
+python Functions.py
 ```
 
 ### 2. Input Your Description
