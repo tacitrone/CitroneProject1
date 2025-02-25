@@ -1,4 +1,3 @@
-from Functions import *
 from JobApplicationGUI import *
 import sys
 

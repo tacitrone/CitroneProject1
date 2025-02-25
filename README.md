@@ -1,12 +1,9 @@
 # AI-Powered Resume Generator
 
-## Overview
-This project allows you to create a professional resume using AI. 
-Simply follow the steps to provide a description of yourself, 
-and the program will generate a customized resume based on your input.
-This project loads in over 1000 jobs into a database, for now the resume is only based off of one job,
-(the first job in the database)
-This project also uses pytest to test the functions that parse the JSON files and to load the databases.
+## Updates:
+This program now interacts with the user through an GUI using PyQt. The interface allows the user to browse the job listing
+database and select certain jobs to see more information on that specific job. It also guides the user through some questions
+to gather information about them, and saves that information in order to (in the future) create a tailored resume.
 
 ## Prerequisites
 Before running the program, you must complete the following setup steps.
@@ -19,29 +16,14 @@ Before running the program, you must complete the following setup steps.
        "api_key": "your_api_key_here"
    }
    ```
+### 2. Download the dependencies in `requirements.txt`
+
+### 3. Run using `main.py`
 
 
-
-## Usage
-
-### 1. Run the Program
-Run the script using Python:
-```bash
-python Functions.py
-```
-
-### 2. Input Your Description
-When prompted, provide a short description of yourself, such as your:
-- Skills
-- Work experience
-- Education
-
-### 3. View Your Resume
-The program will process your input and generate a professional resume based on the information provided. The resume will be saved as a file 'resume.md'
-
-## Example Workflow
-1. **Setup**: Add your API key to the `config.json` file.
-2. **Run the Program**: Use the command `python main.py`.
-3. **Provide Input**: Follow the directions to provide a description of yourself.
-4. **Generated Output**: The program generates a resume based on your input and saves it to a file.
+## Test Functions:
+The JobInfoTest.py tests that when the user selects a job, the correct expanded info is shown.
+The UserDataTest.py tests that when the user inputs there data it is correctly inputed into the person database
+The FileReaderTest.py tests the parsing of the JSON file.
+The DatabaseTest.py tests the creation and insertion of the database.
 

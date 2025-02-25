@@ -1,7 +1,4 @@
-import sys
-import sqlite3
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QTextEdit, QVBoxLayout, QWidget, QLabel, \
-    QPushButton, QHBoxLayout, QLineEdit
+from PyQt5.QtWidgets import *
 from Functions import *
 
 # Define the database file
@@ -117,16 +114,57 @@ class JobInfoApp(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-
     def on_submit(self):
+        # Check if all fields are filled
+        if not all([
+            self.NameInput.text(),
+            self.AgeInput.text(),
+            self.SchoolInput.text(),
+            self.GPAInput.text(),
+            self.ExperienceInput.text(),
+            self.skillInput.text(),
+            self.projectInput.text(),
+            self.emailInput.text(),
+            self.phoneInput.text(),
+            self.linkedinInput.text(),
+            self.addressInput.text(),
+            self.classesInput.text()
+        ]):
+            # Show a message box if any field is empty
+            QMessageBox.warning(self, "Form Incomplete", "Please fill in all the fields.")
+            return  # Stop further execution if the form is incomplete
 
-        #Probably Should add some check to make sure form is actually filled
+        # Validate the 'Age' field to ensure it's an integer
+        try:
+            age = int(self.AgeInput.text())
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid age (integer).")
+            return
 
+        # Validate the 'GPA' field to ensure it's a float
+        try:
+            gpa = float(self.GPAInput.text())
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid GPA (float).")
+            return
 
-        person = Person(self.NameInput.text(), self.AgeInput.text(), self.SchoolInput.text(), self.GPAInput.text(),
-                        self.ExperienceInput.text(), self.skillInput.text(), self.projectInput.text(), self.emailInput.text(),
-                        self.phoneInput.text(), self.linkedinInput.text(), self.addressInput.text(), self.classesInput.text())
-        create_person_table() # PERSON TABLE IS NOT CREATING?
+        # Proceed with creating the person object if validation is successful
+        person = Person(
+            self.NameInput.text(),
+            age,
+            self.SchoolInput.text(),
+            gpa,
+            self.ExperienceInput.text(),
+            self.skillInput.text(),
+            self.projectInput.text(),
+            self.emailInput.text(),
+            self.phoneInput,
+            self.linkedinInput.text(),
+            self.addressInput.text(),
+            self.classesInput.text()
+        )
+
+        create_person_table()
         insert_person_into_db(person)
 
         # Clear the form after submission
