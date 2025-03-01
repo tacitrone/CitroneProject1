@@ -215,8 +215,11 @@ class JobInfoApp(QMainWindow):
             file.write(cover_letter)
 
         QMessageBox.information(self, "Resume and Cover Letter Generated",
-                                "The resume has been generated and saved as 'generated_resume.md', the Cover Letter has been saved as "
-                                "cover_letter.md")
+                                "The resume has been generated and saved as 'generated_resume.pdf', the Cover Letter has been saved as "
+                                "generated_cover_letter.pdf")
+
+        convert_md_to_pdf("resume.md", "generated_resume.pdf")
+        convert_md_to_pdf("coverletter.md", "generated_coverletter.pdf")
 
     def on_submit(self):
         # Check if all fields are filled

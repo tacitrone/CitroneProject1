@@ -1,6 +1,7 @@
 import google.generativeai as genai
 import json
 import sqlite3
+from markdown_pdf import MarkdownPdf, Section
 
 # Define the database file
 DB_FILE = "jobs.db"
@@ -265,4 +266,33 @@ def fetch_jobs_data():
         })
 
     return job_data
+
+
+def convert_md_to_pdf(md_file_path, pdf_file_path):
+    try:
+        # Create a fresh MarkdownPdf instance each time
+        pdf = MarkdownPdf()
+
+        # Read the Markdown content from the file
+        with open(md_file_path, 'r', encoding='utf-8') as md_file:
+            markdown_content = md_file.read()
+
+        # Add the Markdown content as a section
+        section = Section(markdown_content)
+        pdf.add_section(section)
+
+        # Save the PDF to the specified file path
+        pdf.save(pdf_file_path)
+
+        print(f"PDF generated successfully: {pdf_file_path}")
+        return True  # Indicate success
+    except FileNotFoundError:
+        print(f"Error: Markdown file not found at {md_file_path}")
+        return False
+    except PermissionError:
+        print(f"Error: Permission denied when accessing {md_file_path} or {pdf_file_path}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return False
 
