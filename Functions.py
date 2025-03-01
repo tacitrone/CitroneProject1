@@ -91,7 +91,8 @@ def get_api_key(file_path):
 
 # Class to store user information
 class Person:
-    def __init__(self, name, age, school, gpa, experience, skills, projects,  email, phone, linkedIn, address, classes):
+    def __init__(self, profile, name, age, school, gpa, experience, skills, projects,  email, phone, linkedIn, address, classes):
+        self.profile = profile
         self.name = name
         self.age = age
         self.school = school
@@ -136,6 +137,7 @@ def create_person_table():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS person (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile TEXT,
         name TEXT,
         age INTEGER,
         school TEXT,
@@ -158,9 +160,9 @@ def insert_person_into_db(person):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
-    INSERT INTO person (name, age, school, gpa, experience, skills, projects, email, phone, linked_in, address, classes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (person.name, person.age, person.school, person.gpa, person.experience, person.skills, person.projects, person.email,
+    INSERT INTO person (profile, name, age, school, gpa, experience, skills, projects, email, phone, linked_in, address, classes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (person.profile, person.name, person.age, person.school, person.gpa, person.experience, person.skills, person.projects, person.email,
           person.phone, person.linkedIn, person.address, person.classes))
     conn.commit()
     conn.close()
@@ -194,17 +196,7 @@ def parse_alternate_json(file_path="rapid_jobs2.json"):
 
 # Function to format person details for output
 def printPerson(person):
-    return (f"Name: {person.name}\n"
-            f"Age: {person.age}\n"
-            f"School: {person.school}\n"
-            f"GPA: {person.gpa}\n"
-            f"Experience: {person.experience}\n"
-            f"Skills: {person.skills}\n"
-            f"Projects: {person.projects}\n"
-            f"Email: {person.email}\n"
-            f"Phone: {person.phone}\n"
-            f"LinkedIn: {person.linkedIn}\n"
-            f"Address: {person.address}\n")
+    return "\n".join([f"{key}: {value}" for key, value in person.items() if value])  # Correct way to access dictionary keys
 
 
 # Function to create the database if it does not exist
@@ -273,3 +265,4 @@ def fetch_jobs_data():
         })
 
     return job_data
+

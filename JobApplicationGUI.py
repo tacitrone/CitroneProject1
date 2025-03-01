@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from Functions import *
+from google.generativeai import *
 
 # Define the database file
 DB_FILE = "jobs.db"
@@ -10,16 +11,20 @@ class JobInfoApp(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Job Listings")
-        self.setGeometry(100, 100, 1000, 600)
+        self.setGeometry(100, 100, 1000, 1000)
 
         self.jobs_data = self.fetch_jobs_data()  # Fetch jobs from the database
         self.init_ui()
 
     # Initialize the UI
     def init_ui(self):
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        main_layout = QHBoxLayout()
         LeftSide = QVBoxLayout()
         RightSide = QVBoxLayout()
+        Bottom = QHBoxLayout()
+        BottomLeft = QVBoxLayout()
+        BottomRight = QVBoxLayout()
 
         # Create a list widget to show job titles
         self.job_list_widget = QListWidget()
@@ -35,6 +40,8 @@ class JobInfoApp(QMainWindow):
         self.refresh_button.clicked.connect(self.refresh_job_data)  # Connect refresh event
 
         #Create a Form
+        self.ProfileName = QLabel("Profile")
+        self.ProfileInput = QLineEdit()
         self.NameLabel = QLabel("Name")
         self.NameInput = QLineEdit()
         self.AgeLabel = QLabel("Age")
@@ -71,6 +78,8 @@ class JobInfoApp(QMainWindow):
 
         #Add the widgets to the Right Side:
         RightSide.addWidget(QLabel("Please fill out this form to add your information to the resume database."))
+        RightSide.addWidget(self.ProfileName)
+        RightSide.addWidget(self.ProfileInput)
         RightSide.addWidget(self.NameLabel)
         RightSide.addWidget(self.NameInput)
         RightSide.addWidget(self.AgeLabel)
@@ -96,17 +105,30 @@ class JobInfoApp(QMainWindow):
         RightSide.addWidget(self.classesLabel)
         RightSide.addWidget(self.classesInput)
 
+        # Profile Selection Dropdown
+        self.profile_dropdown = QComboBox()
+        self.profile_dropdown.addItems(self.fetch_profiles())  # Fetch and populate profiles
+
+        # Create Resume Button
+        self.create_resume_button = QPushButton("Create Resume")
+        self.create_resume_button.clicked.connect(self.create_resume)
+
+
         #Add a submit button:
         submit_button = QPushButton("Submit")
         submit_button.clicked.connect(self.on_submit)  # Connect to the method that handles the button click
         RightSide.addWidget(submit_button)
 
 
+        #Bottom Area for Profile Selection and Create Resume Button:
+        BottomRight.addWidget(self.create_resume_button)
+        BottomLeft.addWidget(self.profile_dropdown)
 
 
         #add Left Side to layout
-        layout.addLayout(LeftSide)
-        layout.addLayout(RightSide)
+        main_layout.addLayout(LeftSide)
+        main_layout.addLayout(RightSide)
+        layout.addLayout(main_layout)
 
 
         # Set the layout for the central widget
@@ -114,9 +136,80 @@ class JobInfoApp(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        #Add bottom to layout:
+        Bottom.addLayout(BottomLeft)
+        Bottom.addLayout(BottomRight)
+        layout.addLayout(Bottom)
+
+    def create_resume(self):
+        selected_profile = self.profile_dropdown.currentText()  # Get selected profile name
+        selected_index = self.job_list_widget.currentRow()  # Get selected job index
+
+        if not selected_profile:
+            QMessageBox.warning(self, "No Profile Selected", "Please select a profile before generating a resume.")
+            return
+
+        if selected_index < 0:
+            QMessageBox.warning(self, "No Job Selected", "Please select a job before generating a resume.")
+            return
+
+        # Fetch the selected job details
+        selected_job = self.jobs_data[selected_index]
+
+        # Fetch the full profile details based on the selected profile name
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM person WHERE profile = ?", (selected_profile,))
+        person_data = cursor.fetchone()
+        conn.close()
+
+        if not person_data:
+            QMessageBox.warning(self, "Profile Not Found", "The selected profile could not be found in the database.")
+            return
+
+        # Create a formatted string of person details
+        myPerson = {
+            "Profile": person_data[1],
+            "Name": person_data[2],
+            "Age": person_data[3],
+            "School": person_data[4],
+            "GPA": person_data[5],
+            "Experience": person_data[6],
+            "Skills": person_data[7],
+            "Projects": person_data[8],
+            "Email": person_data[9],
+            "Phone": person_data[10],
+            "LinkedIn": person_data[11],
+            "Address": person_data[12],
+            "Classes": person_data[13]
+        }
+
+        # Generate the resume using the AI model
+        prompt = (
+            "Give me a sample resume in markdown format designed for my skills "
+            "and the job description I provided.\n"
+            f"Here is a description of myself:\n{printPerson(myPerson)}"
+            f"\nHere is a job description:\n{selected_job['description']}"
+        )
+        genai.configure(api_key=get_api_key("config.json"))
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+
+        # Display the generated resume (assuming Markdown output)
+        resume_text = response.text
+        self.job_details_text.setPlainText(resume_text)  # Show in job details text box
+
+        # Optionally, save the resume to a file
+        with open("resume.md", "w") as file:
+            file.write(resume_text)
+
+        QMessageBox.information(self, "Resume Generated",
+                                "The resume has been generated and saved as 'generated_resume.md'.")
+
     def on_submit(self):
         # Check if all fields are filled
         if not all([
+            self.ProfileInput.text(),
             self.NameInput.text(),
             self.AgeInput.text(),
             self.SchoolInput.text(),
@@ -150,6 +243,7 @@ class JobInfoApp(QMainWindow):
 
         # Proceed with creating the person object if validation is successful
         person = Person(
+            self.ProfileInput.text(),
             self.NameInput.text(),
             age,
             self.SchoolInput.text(),
@@ -158,7 +252,7 @@ class JobInfoApp(QMainWindow):
             self.skillInput.text(),
             self.projectInput.text(),
             self.emailInput.text(),
-            self.phoneInput,
+            self.phoneInput.text(),
             self.linkedinInput.text(),
             self.addressInput.text(),
             self.classesInput.text()
@@ -167,7 +261,12 @@ class JobInfoApp(QMainWindow):
         create_person_table()
         insert_person_into_db(person)
 
+        # Refresh the profile dropdown by fetching updated profiles
+        self.profile_dropdown.clear()  # Clear the current dropdown
+        self.profile_dropdown.addItems(self.fetch_profiles())  # Add the new profiles
+
         # Clear the form after submission
+        self.ProfileInput.clear()
         self.NameInput.clear()
         self.AgeInput.clear()
         self.SchoolInput.clear()
@@ -245,4 +344,18 @@ class JobInfoApp(QMainWindow):
         self.job_list_widget.clear()
         self.job_list_widget.addItems([job['title'] for job in self.jobs_data])
 
+    def fetch_profiles(self):
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("SELECT profile FROM person")  # Fetch only profile names
+            profiles = [row[0] for row in cursor.fetchall()]
+        except sqlite3.OperationalError:
+            # If the person table does not exist, return an empty list
+            profiles = []
+        finally:
+            conn.close()
+
+        return profiles if profiles else ["No Profiles Available"]  # Avoid empty dropdown
 
