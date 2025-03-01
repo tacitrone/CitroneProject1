@@ -191,20 +191,32 @@ class JobInfoApp(QMainWindow):
             f"Here is a description of myself:\n{printPerson(myPerson)}"
             f"\nHere is a job description:\n{selected_job['description']}"
         )
+        prompt2 = ("Give me a sample cover letter in markdown format designed for my skills "
+            "and the job description I provided.\n"
+            f"Here is a description of myself:\n{printPerson(myPerson)}"
+            f"\nHere is a job description:\n{selected_job['description']}")
+
         genai.configure(api_key=get_api_key("config.json"))
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
 
+        response2 = model.generate_content(prompt2)
+
         # Display the generated resume (assuming Markdown output)
         resume_text = response.text
+        cover_letter = response2.text
         self.job_details_text.setPlainText(resume_text)  # Show in job details text box
 
         # Optionally, save the resume to a file
         with open("resume.md", "w") as file:
             file.write(resume_text)
 
-        QMessageBox.information(self, "Resume Generated",
-                                "The resume has been generated and saved as 'generated_resume.md'.")
+        with open("coverletter.md", "w") as file:
+            file.write(cover_letter)
+
+        QMessageBox.information(self, "Resume and Cover Letter Generated",
+                                "The resume has been generated and saved as 'generated_resume.md', the Cover Letter has been saved as "
+                                "cover_letter.md")
 
     def on_submit(self):
         # Check if all fields are filled
