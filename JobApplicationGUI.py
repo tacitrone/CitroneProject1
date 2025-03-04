@@ -5,6 +5,8 @@ from google.generativeai import *
 # Define the database file
 DB_FILE = "jobs.db"
 
+
+
 # Main window for the GUI
 class JobInfoApp(QMainWindow):
     def __init__(self):
