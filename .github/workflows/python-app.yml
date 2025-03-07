@@ -39,7 +39,7 @@ jobs:
       run: echo "API key is set"
       if: env.API_KEY != ''
 
-    - name: Generate myscript.py
+    - name: Generate my_script.py
       env:
         API_KEY: ${{ secrets.LLM_API_KEY }}
       run: |
