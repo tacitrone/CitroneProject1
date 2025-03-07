@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from Functions import *
-from google.generativeai import *
+import google.generativeai as genai
 import os
 
 # Define the database file
