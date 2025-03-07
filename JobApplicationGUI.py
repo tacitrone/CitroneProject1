@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from Functions import *
 from google.generativeai import *
+import os
 
 # Define the database file
 DB_FILE = "jobs.db"
@@ -198,7 +199,8 @@ class JobInfoApp(QMainWindow):
             f"Here is a description of myself:\n{printPerson(myPerson)}"
             f"\nHere is a job description:\n{selected_job['description']}")
 
-        genai.configure(api_key=get_api_key("config.json"))
+        api_key = os.getenv("API_KEY")
+        genai.configure(api_key=get_api_key(api_key))
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
 
