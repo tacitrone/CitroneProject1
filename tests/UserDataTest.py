@@ -59,7 +59,7 @@ def test_show_job_details(job_info_app):
 
 def test_insert_person_into_db(setup_database, db_connection):
     """Test that user-entered data is stored in the database correctly."""
-    person = Person("John Doe", "25", "Test University", "3.8", "2 years", "Python, SQL", "Portfolio Project",
+    person = Person("Test Profile", "John Doe", "25", "Test University", "3.8", "2 years", "Python, SQL", "Portfolio Project",
                     "john@example.com", "1234567890", "linkedin.com/in/johndoe", "123 Test St", "CS101, CS202")
 
     insert_person_into_db(person)
@@ -69,15 +69,16 @@ def test_insert_person_into_db(setup_database, db_connection):
     result = cursor.fetchone()
 
     assert result is not None, "Person record was not inserted into the database."
-    assert result[1] == "John Doe"
-    assert str(result[2]) == "25"
-    assert result[3] == "Test University"
-    assert str(result[4]) == "3.8"
-    assert result[5] == "2 years"
-    assert result[6] == "Python, SQL"
-    assert result[7] == "Portfolio Project"
-    assert result[8] == "john@example.com"
-    assert result[9] == "1234567890"
-    assert result[10] == "linkedin.com/in/johndoe"
-    assert result[11] == "123 Test St"
-    assert result[12] == "CS101, CS202"
+    result[1] == "Test Profile"
+    assert result[2] == "John Doe"
+    assert str(result[3]) == "25"
+    assert result[4] == "Test University"
+    assert str(result[5]) == "3.8"
+    assert result[6] == "2 years"
+    assert result[7] == "Python, SQL"
+    assert result[8] == "Portfolio Project"
+    assert result[9] == "john@example.com"
+    assert result[10] == "1234567890"
+    assert result[11] == "linkedin.com/in/johndoe"
+    assert result[12] == "123 Test St"
+    assert result[13] == "CS101, CS202"
