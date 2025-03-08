@@ -49,5 +49,4 @@ jobs:
 
     - name: Test with pytest
       run: |
-        export QT_QPA_PLATFORM=offscreen
         python -m pytest tests/*.py
