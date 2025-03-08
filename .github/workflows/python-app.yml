@@ -38,11 +38,11 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Generate my_script.py
-      run: |
-        echo "gemini_api_key = \"${{ secrets.LLM_API_KEY }}\"" > my_script.py
+    - name: Build Secrets
       env:
         API_KEY: ${{ secrets.LLM_API_KEY }}
+      run: |
+          echo 'gemini_api_key = "'$API_KEY'"' >> api_secrets.py
     - name: Lint with flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
