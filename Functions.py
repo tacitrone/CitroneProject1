@@ -4,7 +4,7 @@ import sqlite3
 from markdown_pdf import MarkdownPdf, Section
 
 # Define the database file
-DB_FILE = ".github/resources/jobs.db"
+DB_FILE = "resources/jobs.db"
 
 # SQL statement to create the jobs table if it does not exist
 CREATE_TABLE_QUERY = """
