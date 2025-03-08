@@ -4,7 +4,7 @@ import sqlite3
 from markdown_pdf import MarkdownPdf, Section
 
 # Define the database file
-DB_FILE = "jobs.db"
+DB_FILE = ".github/resources/jobs.db"
 
 # SQL statement to create the jobs table if it does not exist
 CREATE_TABLE_QUERY = """
@@ -170,7 +170,7 @@ def insert_person_into_db(person):
 
 
 # Function to parse job data from a JSON file
-def parseJSON(filename="fixed_rapidResults.json"):
+def parseJSON(filename=".github/resources/fixed_rapidResults.json"):
     with open(filename, "r", encoding="utf-8") as file:
         try:
             data = [json.loads(line) for line in file]
@@ -181,7 +181,7 @@ def parseJSON(filename="fixed_rapidResults.json"):
 
 
 # Function to parse an alternate job data JSON file
-def parse_alternate_json(file_path="rapid_jobs2.json"):
+def parse_alternate_json(file_path=".github/resources/rapid_jobs2.json"):
     with open(file_path, "r", encoding="utf-8") as file:
         try:
             data = []
