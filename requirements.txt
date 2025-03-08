@@ -5,4 +5,5 @@ PyQt5~=5.15.11
 markdown-pdf~=1.3.3
 pytest-qt
 google-generativeai
+pyside6
 

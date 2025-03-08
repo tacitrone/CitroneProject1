@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from src.JobApplicationGUI import JobInfoApp  # Corrected module name
-from PyQt5.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 import sys
 
 
