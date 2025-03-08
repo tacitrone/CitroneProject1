@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from PyQt5.QtWidgets import QApplication
-from JobApplicationGUI import *
+from src.JobApplicationGUI import *
 
 # Fixture for QApplication (needed for PyQt5 tests)
 @pytest.fixture

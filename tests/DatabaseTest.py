@@ -1,6 +1,6 @@
 import sqlite3
 import pytest
-from Functions import insert_jobs
+from src.Functions import insert_jobs
 
 # Sample test job entry
 TEST_JOB = [

@@ -1,4 +1,4 @@
-from JobApplicationGUI import *
+from src.JobApplicationGUI import *
 import sys
 
 

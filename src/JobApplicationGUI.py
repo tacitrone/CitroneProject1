@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import *
-from Functions import *
+from src.Functions import *
 import google.generativeai as genai
 import os
 
 # Define the database file
-DB_FILE = "resources/jobs.db"
+DB_FILE = "../resources/jobs.db"
 
 
 
@@ -212,18 +212,18 @@ class JobInfoApp(QMainWindow):
         self.job_details_text.setPlainText(resume_text)  # Show in job details text box
 
         # Optionally, save the resume to a file
-        with open("output/resume.md", "w") as file:
+        with open("../output/resume.md", "w") as file:
             file.write(resume_text)
 
-        with open("output/coverletter.md", "w") as file:
+        with open("../output/coverletter.md", "w") as file:
             file.write(cover_letter)
 
         QMessageBox.information(self, "Resume and Cover Letter Generated",
                                 "The resume has been generated and saved as 'generated_resume.pdf', the Cover Letter has been saved as "
                                 "generated_cover_letter.pdf")
 
-        convert_md_to_pdf("output/resume.md", "output/generated_resume.pdf")
-        convert_md_to_pdf("output/coverletter.md", "output/generated_coverletter.pdf")
+        convert_md_to_pdf("../output/resume.md", "output/generated_resume.pdf")
+        convert_md_to_pdf("../output/coverletter.md", "output/generated_coverletter.pdf")
 
     def on_submit(self):
         # Check if all fields are filled

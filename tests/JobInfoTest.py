@@ -1,6 +1,6 @@
 import pytest
 from PyQt5.QtWidgets import QApplication
-from JobApplicationGUI import * 
+from src.JobApplicationGUI import *
 
 @pytest.fixture(scope="module")
 def app():

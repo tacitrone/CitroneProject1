@@ -1,8 +1,7 @@
 import pytest
-import sqlite3
 from PyQt5.QtWidgets import QApplication
-from JobApplicationGUI import *
-from Functions import *  # Assuming you have a Person model
+from src.JobApplicationGUI import *
+from src.Functions import *  # Assuming you have a Person model
 
 DB_FILE = "../resources/jobs.db"
 
