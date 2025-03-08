@@ -40,5 +40,5 @@ def test_fetch_jobs_data(job_app):
         assert jobs_data[0]['title'] == "Software Engineer"
         assert jobs_data[0]['company'] == "Tech Co"
         assert jobs_data[0]['description'] == "Develop software solutions"
-        mock_connect.assert_called_once_with("jobs.db")
+        mock_connect.assert_called_once_with("../resources/jobs.db")
         mock_cursor.execute.assert_called_once_with("SELECT * FROM jobs")
