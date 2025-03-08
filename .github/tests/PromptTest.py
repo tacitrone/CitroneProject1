@@ -1,58 +1,72 @@
 import pytest
+from unittest.mock import patch, MagicMock
+from JobApplicationGUI import JobInfoApp  # Corrected module name
+from PyQt5.QtWidgets import QApplication
+import sys
 
 
-# Dummy implementation to simulate the printPerson functionality.
-def printPerson(person):
-    # For testing purposes, simply return a string combining name and location.
-    return f"{person['name']} from {person['location']}"
+@pytest.fixture(scope="session", autouse=True)
+def qt_app():
+    app = QApplication(sys.argv)
+    yield app
 
 
-# Functions to create the resume and cover letter prompts.
-def create_resume_prompt(myPerson, selected_job):
-    return (
-        "Give me a sample resume in markdown format designed for my skills "
-        "and the job description I provided.\n"
-        f"Here is a description of myself:\n{printPerson(myPerson)}"
-        f"\nHere is a job description:\n{selected_job['description']}"
-    )
+@pytest.fixture
+def mock_db_connection():
+    with patch('JobApplicationGUI.sqlite3.connect') as mock_connect:  # Corrected path
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Mock profile data
+        mock_cursor.fetchone.return_value = (
+            1, "Test Profile", "John Doe", 25, "Test University", 3.8,
+            "2 years of experience", "Python, Java", "Portfolio Project",
+            "john@example.com", "1234567890", "linkedin.com/john", "123 Street", "CS101, AI"
+        )
+
+        yield mock_connect
 
 
-def create_cover_letter_prompt(myPerson, selected_job):
-    return (
-        "Give me a sample cover letter in markdown format designed for my skills "
-        "and the job description I provided.\n"
-        f"Here is a description of myself:\n{printPerson(myPerson)}"
-        f"\nHere is a job description:\n{selected_job['description']}"
-    )
+@pytest.fixture
+def job_info_app(mock_db_connection):
+    app = JobInfoApp()
+
+    # Mock GUI elements to prevent crashes
+    app.profile_dropdown = MagicMock()
+    app.job_list_widget = MagicMock()
+    app.job_details_text = MagicMock()
+
+    app.jobs_data = [{
+        'title': 'Software Engineer',
+        'company': 'Tech Corp',
+        'location': 'New York',
+        'job_type': 'Full-time',
+        'date_posted': '2024-03-01',
+        'salary_source': 'Glassdoor',
+        'description': 'Looking for a software engineer with Python experience.'
+    }]
+
+    app.profile_dropdown.currentText.return_value = "Test Profile"
+    app.job_list_widget.currentRow.return_value = 0
+    app.job_details_text.toPlainText.return_value = "Generated Resume Text"
+
+    return app
 
 
-# Test to ensure the resume prompt contains both user information and job description.
-def test_resume_prompt_contains_user_info_and_job_description():
-    # Setup dummy data
-    myPerson = {"name": "Alice", "location": "Wonderland"}
-    selected_job = {"description": "Looking for a software engineer with AI expertise."}
+def test_create_resume_prompt_contains_profile_and_job_data(job_info_app):
+    app = job_info_app
 
-    resume_prompt = create_resume_prompt(myPerson, selected_job)
+    app.create_resume()
 
-    expected_user_info = printPerson(myPerson)
-    expected_job_description = selected_job["description"]
+    expected_profile_keywords = ["John Doe", "Test University", "Python, Java", "CS101, AI"]
+    expected_job_keywords = ["Software Engineer", "Tech Corp", "Python experience"]
 
-    # Check that both expected strings are present in the resume prompt.
-    assert expected_user_info in resume_prompt, "Resume prompt does not contain user information."
-    assert expected_job_description in resume_prompt, "Resume prompt does not contain job description."
+    resume_text = app.job_details_text.toPlainText()
 
+    for keyword in expected_profile_keywords:
+        assert keyword in resume_text, f"Missing profile data: {keyword}"
 
-# Test to ensure the cover letter prompt contains both user information and job description.
-def test_cover_letter_prompt_contains_user_info_and_job_description():
-    # Setup dummy data
-    myPerson = {"name": "Alice", "location": "Wonderland"}
-    selected_job = {"description": "Looking for a software engineer with AI expertise."}
-
-    cover_letter_prompt = create_cover_letter_prompt(myPerson, selected_job)
-
-    expected_user_info = printPerson(myPerson)
-    expected_job_description = selected_job["description"]
-
-    # Check that both expected strings are present in the cover letter prompt.
-    assert expected_user_info in cover_letter_prompt, "Cover letter prompt does not contain user information."
-    assert expected_job_description in cover_letter_prompt, "Cover letter prompt does not contain job description."
+    for keyword in expected_job_keywords:
+        assert keyword in resume_text, f"Missing job data: {keyword}"
