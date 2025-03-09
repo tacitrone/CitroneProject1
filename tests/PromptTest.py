@@ -1,72 +1,143 @@
 import pytest
-from unittest.mock import patch, MagicMock
-from src.JobApplicationGUI import JobInfoApp  # Corrected module name
-from PySide6.QtWidgets import QApplication
-import sys
+from src.JobApplicationGUI import *
+from src.Functions import *
 
 
-@pytest.fixture(scope="session", autouse=True)
-def qt_app():
-    app = QApplication(sys.argv)
-    yield app
-
-
-@pytest.fixture
-def mock_db_connection():
-    with patch('JobApplicationGUI.sqlite3.connect') as mock_connect:  # Corrected path
-        mock_conn = MagicMock()
-        mock_cursor = MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
-
-        # Mock profile data
-        mock_cursor.fetchone.return_value = (
-            1, "Test Profile", "John Doe", 25, "Test University", 3.8,
-            "2 years of experience", "Python, Java", "Portfolio Project",
-            "john@example.com", "1234567890", "linkedin.com/john", "123 Street", "CS101, AI"
-        )
-
-        yield mock_connect
+# Mock class to simulate the 'self' parameter
+class MockResumeGenerator:
+    def __init__(self):
+        pass
 
 
 @pytest.fixture
-def job_info_app(mock_db_connection):
-    app = JobInfoApp()
-
-    # Mock GUI elements to prevent crashes
-    app.profile_dropdown = MagicMock()
-    app.job_list_widget = MagicMock()
-    app.job_details_text = MagicMock()
-
-    app.jobs_data = [{
-        'title': 'Software Engineer',
-        'company': 'Tech Corp',
-        'location': 'New York',
-        'job_type': 'Full-time',
-        'date_posted': '2024-03-01',
-        'salary_source': 'Glassdoor',
-        'description': 'Looking for a software engineer with Python experience.'
-    }]
-
-    app.profile_dropdown.currentText.return_value = "Test Profile"
-    app.job_list_widget.currentRow.return_value = 0
-    app.job_details_text.toPlainText.return_value = "Generated Resume Text"
-
-    return app
+def mock_generator():
+    return MockResumeGenerator()
 
 
-def test_create_resume_prompt_contains_profile_and_job_data(job_info_app):
-    app = job_info_app
+@pytest.fixture
+def sample_person():
+    return {
+        "Profile": "Software Engineer",
+        "Name": "John Doe",
+        "Age": 30,
+        "School": "Tech University",
+        "GPA": 3.8,
+        "Experience": "5 years",
+        "Skills": "Python, Java, SQL",
+        "Projects": "Project A, Project B",
+        "Email": "john.doe@example.com",
+        "Phone": "123-456-7890",
+        "LinkedIn": "linkedin.com/in/johndoe",
+        "Address": "123 Tech St",
+        "Classes": "CS101, CS202",
+        "EmptyField": ""  # This should be filtered out by printPerson
+    }
 
-    app.create_resume()
 
-    expected_profile_keywords = ["John Doe", "Test University", "Python, Java", "CS101, AI"]
-    expected_job_keywords = ["Software Engineer", "Tech Corp", "Python experience"]
+@pytest.fixture
+def sample_job():
+    return {
+        "description": "Looking for a skilled Software Engineer with experience in Python and Java."
+    }
 
-    resume_text = app.job_details_text.toPlainText()
 
-    for keyword in expected_profile_keywords:
-        assert keyword in resume_text, f"Missing profile data: {keyword}"
+def test_createResumePrompt(mock_generator, sample_person, sample_job):
+    # Call the function with mocked self
+    prompt = createResumePrompt(mock_generator, sample_person, sample_job)
 
-    for keyword in expected_job_keywords:
-        assert keyword in resume_text, f"Missing job data: {keyword}"
+    # Expected parts of the prompt
+    expected_start = "Give me a sample resume in markdown format designed for my skills and the job description I provided."
+    expected_person = printPerson(sample_person)
+    expected_job = sample_job["description"]
+
+    # Assertions
+    assert isinstance(prompt, str)
+    assert expected_start in prompt
+    assert expected_person in prompt
+    assert expected_job in prompt
+    assert "Here is a description of myself:" in prompt
+    assert "Here is a job description:" in prompt
+    assert "EmptyField" not in prompt  # Should be filtered out by printPerson
+
+
+def test_createCoverLetterPrompt(mock_generator, sample_person, sample_job):
+    # Call the function with mocked self
+    prompt = createCoverLetterPrompt(mock_generator, sample_person, sample_job)
+
+    # Expected parts of the prompt
+    expected_start = "Give me a sample cover letter in markdown format designed for my skills and the job description I provided."
+    expected_person = printPerson(sample_person)
+    expected_job = sample_job["description"]
+
+    # Assertions
+    assert isinstance(prompt, str)
+    assert expected_start in prompt
+    assert expected_person in prompt
+    assert expected_job in prompt
+    assert "Here is a description of myself:" in prompt
+    assert "Here is a job description:" in prompt
+    assert "EmptyField" not in prompt  # Should be filtered out by printPerson
+
+
+def test_prompts_differ(mock_generator, sample_person, sample_job):
+    # Ensure resume and cover letter prompts are different
+    resume_prompt = createResumePrompt(mock_generator, sample_person, sample_job)
+    cover_prompt = createCoverLetterPrompt(mock_generator, sample_person, sample_job)
+
+    assert resume_prompt != cover_prompt
+    assert "resume" in resume_prompt.lower()
+    assert "cover letter" in cover_prompt.lower()
+
+
+def test_empty_person_data(mock_generator, sample_job):
+    # Test with empty person data
+    empty_person = {"Name": "", "Age": None, "Skills": 0}  # All falsy values
+    resume_prompt = createResumePrompt(mock_generator, empty_person, sample_job)
+    cover_prompt = createCoverLetterPrompt(mock_generator, empty_person, sample_job)
+
+    # Split the prompt and check the person data section
+    resume_person_section = resume_prompt.split("myself:")[1].split("Here is a job")[0].strip()
+    cover_person_section = cover_prompt.split("myself:")[1].split("Here is a job")[0].strip()
+
+    # Assert that the person section is empty (only whitespace or newlines)
+    assert resume_person_section == ""  # Should be empty after strip()
+    assert cover_person_section == ""
+    # Ensure job description is still present
+    assert sample_job["description"] in resume_prompt
+    assert sample_job["description"] in cover_prompt
+
+
+def test_partial_person_data(mock_generator, sample_job):
+    # Test with some empty fields
+    partial_person = {
+        "Name": "Jane Doe",
+        "Age": None,  # Falsy, should be filtered
+        "Skills": "Python",
+        "Experience": ""  # Falsy, should be filtered
+    }
+    resume_prompt = createResumePrompt(mock_generator, partial_person, sample_job)
+    cover_prompt = createCoverLetterPrompt(mock_generator, partial_person, sample_job)
+
+    person_text = printPerson(partial_person)
+    assert "Name: Jane Doe" in person_text
+    assert "Skills: Python" in person_text
+    assert "Age" not in person_text
+    assert "Experience" not in person_text
+    assert person_text in resume_prompt
+    assert person_text in cover_prompt
+    assert sample_job["description"] in resume_prompt
+    assert sample_job["description"] in cover_prompt
+
+
+def test_empty_job_description(mock_generator, sample_person):
+    # Test with empty job description
+    empty_job = {"description": ""}
+    resume_prompt = createResumePrompt(mock_generator, sample_person, empty_job)
+    cover_prompt = createCoverLetterPrompt(mock_generator, sample_person, empty_job)
+
+    assert printPerson(sample_person) in resume_prompt
+    assert printPerson(sample_person) in cover_prompt
+    assert "Here is a job description:\n" in resume_prompt
+    assert "Here is a job description:\n" in cover_prompt
+    assert "EmptyField" not in resume_prompt  # Should be filtered out
+    assert "EmptyField" not in cover_prompt

@@ -169,7 +169,7 @@ def insert_person_into_db(person):
 
 
 # Function to parse job data from a JSON file
-def parseJSON(filename=".github/resources/fixed_rapidResults.json"):
+def parseJSON(filename="../resources/fixed_rapidResults.json"):
     with open(filename, "r", encoding="utf-8") as file:
         try:
             data = [json.loads(line) for line in file]
@@ -180,7 +180,7 @@ def parseJSON(filename=".github/resources/fixed_rapidResults.json"):
 
 
 # Function to parse an alternate job data JSON file
-def parse_alternate_json(file_path=".github/resources/rapid_jobs2.json"):
+def parse_alternate_json(file_path="../resources/rapid_jobs2.json"):
     with open(file_path, "r", encoding="utf-8") as file:
         try:
             data = []
@@ -295,3 +295,20 @@ def convert_md_to_pdf(md_file_path, pdf_file_path):
         print(f"An error occurred: {str(e)}")
         return False
 
+
+
+
+def createResumePrompt(self, myPerson, selected_job):
+    prompt = (
+        "Give me a sample resume in markdown format designed for my skills "
+        "and the job description I provided.\n"
+        f"Here is a description of myself:\n{printPerson(myPerson)}"
+        f"\nHere is a job description:\n{selected_job['description']}"
+    )
+    return prompt
+def createCoverLetterPrompt(self, myPerson, selected_job):
+    prompt2 = ("Give me a sample cover letter in markdown format designed for my skills "
+                "and the job description I provided.\n"
+                f"Here is a description of myself:\n{printPerson(myPerson)}"
+                f"\nHere is a job description:\n{selected_job['description']}")
+    return prompt2

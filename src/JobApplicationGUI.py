@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import *
+from PySide6.QtWidgets import *
 from src.Functions import *
 import google.generativeai as genai
 import os
@@ -12,12 +12,18 @@ DB_FILE = "../resources/jobs.db"
 class JobInfoApp(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Job Listings")
         self.setGeometry(100, 100, 1000, 1000)
 
-        self.jobs_data = self.fetch_jobs_data()  # Fetch jobs from the database
+        try:
+            self.jobs_data = self.fetch_jobs_data()  # Fetch jobs from the database
+            print(f"Fetched {len(self.jobs_data)} jobs from the database.")
+        except Exception as e:
+            print(f"Error fetching job data: {e}")
+            self.jobs_data = []  # Prevent crash by assigning an empty list
+
         self.init_ui()
+
 
     # Initialize the UI
     def init_ui(self):
@@ -188,16 +194,8 @@ class JobInfoApp(QMainWindow):
         }
 
         # Generate the resume using the AI model
-        prompt = (
-            "Give me a sample resume in markdown format designed for my skills "
-            "and the job description I provided.\n"
-            f"Here is a description of myself:\n{printPerson(myPerson)}"
-            f"\nHere is a job description:\n{selected_job['description']}"
-        )
-        prompt2 = ("Give me a sample cover letter in markdown format designed for my skills "
-            "and the job description I provided.\n"
-            f"Here is a description of myself:\n{printPerson(myPerson)}"
-            f"\nHere is a job description:\n{selected_job['description']}")
+        prompt = createResumePrompt(self, myPerson, selected_job)
+        prompt2 = createCoverLetterPrompt(self, myPerson, selected_job)
 
         my_api_key = os.getenv("API_KEY")
         genai.configure(api_key=my_api_key)
@@ -211,7 +209,7 @@ class JobInfoApp(QMainWindow):
         cover_letter = response2.text
         self.job_details_text.setPlainText(resume_text)  # Show in job details text box
 
-        # Optionally, save the resume to a file
+
         with open("../output/resume.md", "w") as file:
             file.write(resume_text)
 
@@ -377,4 +375,6 @@ class JobInfoApp(QMainWindow):
             conn.close()
 
         return profiles if profiles else ["No Profiles Available"]  # Avoid empty dropdown
+
+
 
