@@ -1,28 +1,15 @@
 import pytest
 from unittest.mock import Mock, patch
-from PySide6.QtWidgets import QApplication
 from src.JobApplicationGUI import *
 
-# Fixture for QApplication (needed for PyQt5 tests)
 @pytest.fixture
-def app(qtbot):
-    test_app = QApplication.instance()
-    if test_app is None:
-        test_app = QApplication([])
-    yield test_app
-    test_app.quit()
+def job_app(qapp):
+    with patch('sqlite3.connect'):
+        job_app = Mock(spec=JobInfoApp)
+        job_app.fetch_jobs_data = JobInfoApp().fetch_jobs_data  # Use real method
+        return job_app
 
-# Fixture to set up the JobInfoApp instance
-@pytest.fixture
-def job_app(app):
-    with patch('sqlite3.connect'):  # Mock SQLite connection
-        return JobInfoApp()
-
-
-
-# Test 3: Test the fetch_jobs_data production function
 def test_fetch_jobs_data(job_app):
-    # Mock SQLite connection and cursor
     with patch('sqlite3.connect') as mock_connect:
         mock_cursor = Mock()
         mock_cursor.fetchall.return_value = [
@@ -31,11 +18,7 @@ def test_fetch_jobs_data(job_app):
              None, None, "Develop software solutions")
         ]
         mock_connect.return_value.cursor.return_value = mock_cursor
-
-        # Call the function
         jobs_data = job_app.fetch_jobs_data()
-
-        # Assertions
         assert len(jobs_data) == 1
         assert jobs_data[0]['title'] == "Software Engineer"
         assert jobs_data[0]['company'] == "Tech Co"

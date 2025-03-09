@@ -65,4 +65,6 @@ jobs:
 
     - name: Test with pytest
       run: |
-        xvfb-run --auto-servernum python -m pytest tests/*.py -vv
+        xvfb-run --auto-servernum python -m pytest tests/*.py -vv --qt-api=pyside6
+      env:
+        QT_QPA_PLATFORM: xcb
