@@ -312,3 +312,4 @@ def createCoverLetterPrompt(self, myPerson, selected_job):
                 f"Here is a description of myself:\n{printPerson(myPerson)}"
                 f"\nHere is a job description:\n{selected_job['description']}")
     return prompt2
+

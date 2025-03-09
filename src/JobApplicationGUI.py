@@ -14,7 +14,7 @@ class JobInfoApp(QMainWindow):
         super().__init__()
         self.jobs_data = []
         try:
-            self.jobs_data = self.fetch_jobs_data()
+            self.jobs_data = fetch_jobs_data()
             print(f"Fetched {len(self.jobs_data)} jobs from the database.")
         except Exception as e:
             print(f"Error fetching job data: {e}")
@@ -296,30 +296,6 @@ class JobInfoApp(QMainWindow):
         self.linkedinInput.clear()
         self.addressInput.clear()
         self.classesInput.clear()
-
-    # Fetch jobs data from the database
-    def fetch_jobs_data(self):
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM jobs")
-        jobs = cursor.fetchall()
-        conn.close()
-
-        # Map the job data to a dictionary for easy access
-        job_data = []
-        for job in jobs:
-            job_data.append({
-                'id': job[0],
-                'title': job[4],
-                'company': job[5],
-                'location': job[6],
-                'job_type': job[7],
-                'date_posted': job[8],
-                'salary_source': job[9],
-                'description': job[20]
-            })
-
-        return job_data
 
     # Show the details of the selected job
     def show_job_details(self):
