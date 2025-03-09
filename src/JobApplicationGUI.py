@@ -10,19 +10,19 @@ DB_FILE = "../resources/jobs.db"
 
 # Main window for the GUI
 class JobInfoApp(QMainWindow):
-    def __init__(self):
+    def __init__(self, initialize_ui=True):
         super().__init__()
-        self.setWindowTitle("Job Listings")
-        self.setGeometry(100, 100, 1000, 1000)
-
+        self.jobs_data = []
         try:
-            self.jobs_data = self.fetch_jobs_data()  # Fetch jobs from the database
+            self.jobs_data = self.fetch_jobs_data()
             print(f"Fetched {len(self.jobs_data)} jobs from the database.")
         except Exception as e:
             print(f"Error fetching job data: {e}")
-            self.jobs_data = []  # Prevent crash by assigning an empty list
 
-        self.init_ui()
+        if initialize_ui:
+            self.setWindowTitle("Job Listings")
+            self.setGeometry(100, 100, 1000, 1000)
+            self.init_ui()
 
 
     # Initialize the UI
