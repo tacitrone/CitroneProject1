@@ -1,13 +1,13 @@
 name: Python application
 
 on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
-    workflow_dispatch:
-    schedule:
-      - cron: "0 0 * * *"
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"  # Runs daily at midnight UTC
 
 permissions:
   contents: write
@@ -32,22 +32,37 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
-        sudo apt update && sudo apt install --yes libgl1-mesa-dev libxkbcommon-x11-0 xvfb libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 qt6-base-dev
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-dev \
+          libxkbcommon-x11-0 \
+          xvfb \
+          libxcb-xinerama0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-randr0 \
+          libxcb-render-util0 \
+          qt6-base-dev
+
+    - name: Install Python dependencies
+      run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
+        pip install flake8 pytest pytest-qt
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Build Secrets
       env:
         API_KEY: ${{ secrets.LLM_API_KEY }}
       run: |
-          echo 'gemini_api_key = "'$API_KEY'"' >> api_secrets.py
+        echo 'gemini_api_key = "'$API_KEY'"' >> api_secrets.py
+
     - name: Lint with flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
 
     - name: Test with pytest
       run: |
-        python -m pytest tests/*.py
+        xvfb-run --auto-servernum python -m pytest tests/*.py -vv
